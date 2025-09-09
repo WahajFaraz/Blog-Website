@@ -1,9 +1,15 @@
-require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const helmet = require('helmet');
+import dotenv from 'dotenv';
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import helmet from 'helmet';
 
+// Import routes
+import userRoutes from './routes/user.js';
+import blogRoutes from './routes/blog.js';
+import mediaRoutes from './routes/media.js';
+
+dotenv.config();
 const app = express();
 
 app.use(helmet({
@@ -58,9 +64,9 @@ mongoose.connect(process.env.MONGODB_URI, {
 });
 
 // API Routes
-app.use('/api/users', require('./routes/user'));
-app.use('/api/blogs', require('./routes/blog'));
-app.use('/api/media', require('./routes/media'));
+app.use('/api/users', userRoutes);
+app.use('/api/blogs', blogRoutes);
+app.use('/api/media', mediaRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
