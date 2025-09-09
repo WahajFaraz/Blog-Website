@@ -1,12 +1,13 @@
-const express = require('express');
-const jwt = require('jsonwebtoken');
-const { body, validationResult } = require('express-validator');
-const User = require('../models/User');
-const { auth } = require('../middleware/auth');
-const { deleteFile, uploadImage } = require('../utils/cloudinary');
-const { uploadMiddleware, validateImage, validateFileSize } = require('../middleware/upload');
+import express from 'express';
+import jwt from 'jsonwebtoken';
+import { body, validationResult } from 'express-validator';
+import User from '../models/User.js';
+import { auth } from '../middleware/auth.js';
+import { deleteFile, uploadImage } from '../utils/cloudinary.js';
+import { uploadMiddleware, validateImage, validateFileSize } from '../middleware/upload.js';
+import fs from 'fs/promises';
+
 const router = express.Router();
-const fs = require('fs').promises;
 
 const generateToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -371,4 +372,4 @@ router.get('/profile-image', auth, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
