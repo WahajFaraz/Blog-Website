@@ -1,7 +1,7 @@
 {
-  "name": "blogss-server",
+  "name": "blogspace-api",
   "version": "1.0.0",
-  "description": "Blog application backend server",
+  "description": "BlogSpace API Server",
   "main": "index.js",
   "type": "module",
   "engines": {
@@ -9,9 +9,9 @@
     "npm": ">=7.0.0"
   },
   "scripts": {
-    "start": "node --experimental-json-modules index.js",
-    "dev": "nodemon --experimental-json-modules index.js",
-    "vercel-build": "echo 'Skipping build - using serverless functions'"
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "vercel-build": "echo 'Building...'"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

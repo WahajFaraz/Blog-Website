@@ -1,8 +1,8 @@
-require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const helmet = require('helmet');
+import 'dotenv/config';
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import helmet from 'helmet';
 
 const app = express();
 
@@ -12,12 +12,9 @@ app.use(helmet({
 }));
 
 const allowedOrigins = [
-  'https://blog-website-umber-sigma.vercel.app',
-  'http://localhost:5173',
-  'https://blogspace-two.vercel.app'
-];
+  'https://blogspace-two.vercel.app',
+  'http://localhost:5173'];
 
-// Add Vercel preview URL if available
 if (process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_URL) {
   allowedOrigins.push(`https://${process.env.VERCEL_URL}`);
 }
@@ -40,13 +37,12 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// MongoDB connection
-if (!process.env.MONGODB_URI) {
+if (!process.env.MONGODB_URI || !"mongodb+srv://wahajfaraz93:3E2gMCsYTuoywNCH@cluster0.j9dlacs.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0" ) {
   console.error('FATAL ERROR: MONGODB_URI is not defined');
   process.exit(1);
 }
 
-mongoose.connect(process.env.MONGODB_URI, {
+mongoose.connect(process.env.MONGODB_URI || "mongodb+srv://wahajfaraz93:3E2gMCsYTuoywNCH@cluster0.j9dlacs.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0" , {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   serverSelectionTimeoutMS: 5000,
