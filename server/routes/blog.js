@@ -60,11 +60,14 @@ router.get('/', optionalAuth, async (req, res) => {
       return blogObj;
     });
     
-    res.json({
-      blogs: blogsWithLiked,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page,
-      total
+    res.status(200).json({
+      success: true,
+      data: {
+        blogs: blogsWithLiked,
+        totalPages: Math.ceil(total / limit),
+        currentPage: parseInt(page),
+        total: total
+      }
     });
     
   } catch (error) {
