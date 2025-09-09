@@ -29,7 +29,8 @@ if (process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_URL) {
   allowedOrigins.push(`https://${process.env.VERCEL_URL}`);
 }
 
-app.use(cors({
+// CORS configuration
+const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
@@ -40,20 +41,24 @@ app.use(cors({
     console.log('Blocked by CORS:', origin);
     return callback(new Error('Not allowed by CORS'));
   },
-  credentials: true
-}));
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
 
 // Body parser middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 const apiLimiter = rateLimit({
-	windowMs: 15 * 60 * 1000, // 15 minutes
-	max: 100, // Limit each IP to 100 requests per window
-	standardHeaders: true,
-	legacyHeaders: false,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  standardHeaders: true,
+  legacyHeaders: false,
 });
-app.use('/api/', apiLimiter);
+app.use('/api/v1/', apiLimiter);
 
 if (!process.env.MONGODB_URI) {
     console.error("FATAL ERROR: MONGODB_URI is not defined.");
@@ -68,17 +73,17 @@ mongoose.connect(process.env.MONGODB_URI)
 });
 
 // API Routes
-app.use('/api/users', userRoutes);
-app.use('/api/blogs', blogRoutes);
-app.use('/api/media', mediaRoutes);
+app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/blogs', blogRoutes);
+app.use('/api/v1/media', mediaRoutes);
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+app.get('/api/v1/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date() });
 });
 
 // API 404 handler
-app.use('/api/*', (req, res) => {
+app.use('/api/v1/*', (req, res) => {
   res.status(404).json({ 
     success: false,
     error: 'API endpoint not found',
