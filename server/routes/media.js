@@ -1,7 +1,8 @@
-const express = require('express');
-const { auth } = require('../middleware/auth');
-const { uploadMiddleware, validateImage, validateVideo, validateFileSize } = require('../middleware/upload');
-const { uploadImage, uploadVideo, deleteFile } = require('../utils/cloudinary');
+import express from 'express';
+import { auth } from '../middleware/auth.js';
+import { uploadMiddleware, validateImage, validateVideo, validateFileSize } from '../middleware/upload.js';
+import { uploadImage, uploadVideo, deleteFile } from '../utils/cloudinary.js';
+
 const router = express.Router();
 
 router.post('/upload-image', auth, uploadMiddleware, async (req, res) => {
@@ -189,4 +190,4 @@ router.post('/upload-blog-media', auth, uploadMiddleware, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

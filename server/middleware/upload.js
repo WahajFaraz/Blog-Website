@@ -1,6 +1,10 @@
-const fileUpload = require('express-fileupload');
-const os = require('os');
-const path = require('path');
+import fileUpload from 'express-fileupload';
+import os from 'os';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const uploadMiddleware = fileUpload({
   useTempFiles: true,
@@ -51,17 +55,9 @@ const validateFileSize = (file, maxSize = 10 * 1024 * 1024) => {
   return file.size <= maxSize;
 };
 
-const generateUniqueFilename = (originalName) => {
-  const timestamp = Date.now();
-  const randomString = Math.random().toString(36).substring(2, 15);
-  const extension = originalName.split('.').pop();
-  return `${timestamp}_${randomString}.${extension}`;
-};
-
-module.exports = {
+export {
   uploadMiddleware,
   validateImage,
   validateVideo,
-  validateFileSize,
-  generateUniqueFilename
+  validateFileSize
 };

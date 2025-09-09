@@ -3,6 +3,9 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import helmet from 'helmet';
+import userRoutes from './routes/user.js';
+import blogRoutes from './routes/blog.js';
+import mediaRoutes from './routes/media.js';
 
 const app = express();
 
@@ -37,14 +40,12 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-if (!process.env.MONGODB_URI || !"mongodb+srv://wahajfaraz93:3E2gMCsYTuoywNCH@cluster0.j9dlacs.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0" ) {
+if (!process.env.MONGODB_URI) {
   console.error('FATAL ERROR: MONGODB_URI is not defined');
   process.exit(1);
 }
 
-mongoose.connect(process.env.MONGODB_URI || "mongodb+srv://wahajfaraz93:3E2gMCsYTuoywNCH@cluster0.j9dlacs.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0" , {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+mongoose.connect(process.env.MONGODB_URI, {
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000
 })
@@ -55,9 +56,9 @@ mongoose.connect(process.env.MONGODB_URI || "mongodb+srv://wahajfaraz93:3E2gMCsY
 });
 
 // API Routes
-app.use('/api/users', require('./routes/user'));
-app.use('/api/blogs', require('./routes/blog'));
-app.use('/api/media', require('./routes/media'));
+app.use('/api/users', userRoutes);
+app.use('/api/blogs', blogRoutes);
+app.use('/api/media', mediaRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

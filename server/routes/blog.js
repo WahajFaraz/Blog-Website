@@ -1,8 +1,9 @@
-const express = require('express');
-const { body, validationResult } = require('express-validator');
-const Blog = require('../models/Blog');
-const { auth, optionalAuth } = require('../middleware/auth');
-const { deleteFile } = require('../utils/cloudinary');
+import express from 'express';
+import { body, validationResult } from 'express-validator';
+import Blog from '../models/Blog.js';
+import { auth, optionalAuth } from '../middleware/auth.js';
+import { deleteFile } from '../utils/cloudinary.js';
+
 const router = express.Router();
 
 router.get('/', optionalAuth, async (req, res) => {
@@ -467,4 +468,4 @@ router.get('/user/:userId', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

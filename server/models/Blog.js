@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const BlogSchema = new mongoose.Schema({
   title: {
@@ -152,11 +152,12 @@ BlogSchema.methods.toggleLike = function(userId) {
 
 BlogSchema.methods.updateMedia = function(mediaData) {
   this.media = mediaData;
-  this.image = mediaData.url;
   return this.save();
 };
 
 BlogSchema.set('toJSON', { virtuals: true });
 BlogSchema.set('toObject', { virtuals: true });
 
-module.exports = mongoose.model('Blog', BlogSchema);
+const Blog = mongoose.model('Blog', BlogSchema);
+
+export default Blog;
