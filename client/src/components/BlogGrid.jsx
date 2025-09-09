@@ -21,10 +21,11 @@ const BlogGrid = ({ blogs: initialBlogs, searchFilters = { query: '', category: 
       const url = `${baseUrl}/blogs${params.toString() ? '?' + params.toString() : ''}`;
       const response = await fetch(url, {
         method: 'GET',
-        credentials: 'include',
+        mode: 'cors',
+        credentials: 'same-origin',
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
         }
       });
       
