@@ -3,6 +3,9 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import helmet from 'helmet';
+import userRoutes from './routes/user.js';
+import blogRoutes from './routes/blog.js';
+import mediaRoutes from './routes/media.js';
 
 const app = express();
 
@@ -55,9 +58,9 @@ mongoose.connect(process.env.MONGODB_URI || "mongodb+srv://wahajfaraz93:3E2gMCsY
 });
 
 // API Routes
-app.use('/api/users', require('./routes/user'));
-app.use('/api/blogs', require('./routes/blog'));
-app.use('/api/media', require('./routes/media'));
+app.use('/api/users', userRoutes);
+app.use('/api/blogs', blogRoutes);
+app.use('/api/media', mediaRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
