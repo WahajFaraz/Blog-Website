@@ -17,12 +17,16 @@
       "dest": "/server/index.js"
     },
     {
+      "src": "/test",
+      "dest": "/server/index.js"
+    },
+    {
       "src": "/",
       "dest": "/server/index.js"
     },
     {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/client/dist/$1"
     }
   ]
 }
