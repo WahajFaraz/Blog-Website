@@ -19,7 +19,14 @@ const BlogGrid = ({ blogs: initialBlogs, searchFilters = { query: '', category: 
       
       const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
       const url = `${baseUrl}/blogs${params.toString() ? '?' + params.toString() : ''}`;
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
       
       if (!response.ok) {
         throw new Error('Failed to fetch blogs');
