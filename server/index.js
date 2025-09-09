@@ -24,7 +24,7 @@ app.use(helmet({
 app.use((req, res, next) => {
   const allowedOrigins = [
     'https://blogspace-two.vercel.app',
-    'https://blog-website-rouge-nine.vercel.app',
+    'https://blog-website-tau-orpin.vercel.app/',
     'http://localhost:5173'
   ];
   
@@ -74,8 +74,13 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/blogs', blogRoutes);
 app.use('/api/v1/media', mediaRoutes);
 
-// Root endpoint
-app.get('/', (req, res) => {
+// Test endpoint
+app.get('/test', (req, res) => {
+  res.status(200).json({ message: 'Test endpoint is working!' });
+});
+
+// Root endpoint - handle all methods
+app.all('/', (req, res) => {
   const allowedOrigins = [
     'https://blogspace-two.vercel.app',
     'https://blog-website-rouge-nine.vercel.app',
@@ -85,6 +90,12 @@ app.get('/', (req, res) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
     res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  }
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
   }
   
   res.header('Content-Type', 'text/plain');
