@@ -19,7 +19,7 @@ if (process.env.VERCEL_URL) {
   whitelist.push(`https://${process.env.VERCEL_URL}`);
 }
 if (process.env.NODE_ENV !== 'production') {
-  whitelist.push('http://localhost:5173');
+  whitelist.push('https://blogspace-two.vercel.app/');
 }
 
 const corsOptions = {
