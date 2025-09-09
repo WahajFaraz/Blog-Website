@@ -76,6 +76,18 @@ app.use('/api/v1/media', mediaRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
+  const allowedOrigins = [
+    'https://blogspace-two.vercel.app',
+    'https://blog-website-rouge-nine.vercel.app',
+    'http://localhost:5173'
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  
+  res.header('Content-Type', 'text/plain');
   res.status(200).send("hello from wahaj's world");
 });
 
