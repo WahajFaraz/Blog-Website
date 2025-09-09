@@ -13,7 +13,7 @@ app.use(helmet({
 
 const allowedOrigins = [
   'https://blog-website-umber-sigma.vercel.app',
-  'http://localhost:5173'
+  'http://localhost:5173',
 ];
 
 // Add Vercel preview URL if available
