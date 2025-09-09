@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => ({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://blog-website-rouge-nine.vercel.app',
         changeOrigin: true,
         secure: false,
       },
