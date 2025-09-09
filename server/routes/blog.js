@@ -7,10 +7,17 @@ import { deleteFile } from '../utils/cloudinary.js';
 const router = express.Router();
 
 router.get('/', optionalAuth, async (req, res) => {
+  console.log('GET /blogs - Query params:', req.query);
   try {
     const { page = 1, limit = 10, category, search, sort = 'newest' } = req.query;
     
+    // Validate page and limit
+    const pageNum = Math.max(1, parseInt(page));
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit)));
+    
     let query = { status: 'published' };
+    
+    console.log('Processed query params:', { page: pageNum, limit: limitNum, category, search, sort });
     
     if (category && category !== 'all') {
       query.category = category;
@@ -43,14 +50,20 @@ router.get('/', optionalAuth, async (req, res) => {
         sortOptions = { publishedAt: -1 };
     }
     
-    const blogs = await Blog.find(query)
-      .populate('author', 'username fullName avatar')
-      .sort(sortOptions)
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .exec();
+    console.log('MongoDB Query:', JSON.stringify(query, null, 2));
     
-    const total = await Blog.countDocuments(query);
+    const [blogs, total] = await Promise.all([
+      Blog.find(query)
+        .populate('author', 'username fullName avatar')
+        .sort(sortOptions)
+        .limit(limitNum)
+        .skip((pageNum - 1) * limitNum)
+        .lean()
+        .exec(),
+      Blog.countDocuments(query).exec()
+    ]);
+    
+    console.log(`Found ${blogs.length} blogs out of ${total} total`);
     
     const blogsWithLiked = blogs.map(blog => {
       const blogObj = blog.toObject();
@@ -71,8 +84,21 @@ router.get('/', optionalAuth, async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Get blogs error:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error('Get blogs error:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      code: error.code,
+      keyPattern: error.keyPattern,
+      keyValue: error.keyValue,
+      errors: error.errors
+    });
+    
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch blogs',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
