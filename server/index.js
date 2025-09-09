@@ -21,56 +21,29 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false
 }));
 
-const allowedOrigins = [
-  'https://blogspace-two.vercel.app',
-  'https://blog-website-rouge-nine.vercel.app',
-  'http://localhost:5173'];
-
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    
-    const allowed = allowedOrigins.some(allowedOrigin => {
-      return origin === allowedOrigin || 
-             origin === `https://${allowedOrigin}` ||
-             origin === `http://${allowedOrigin}`;
-    });
-
-    if (allowed) {
-      return callback(null, true);
-    }
-    
-    console.log('Blocked by CORS:', origin);
-    return callback(new Error(`Not allowed by CORS. Origin: ${origin}`));
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-Requested-With',
-    'Accept',
-    'Origin',
-    'Access-Control-Allow-Headers',
-    'Access-Control-Request-Method',
-    'Access-Control-Request-Headers'
-  ],
-  exposedHeaders: [
-    'Content-Length',
-    'Content-Type',
-    'Authorization',
-    'X-Total-Count',
-    'Link'
-  ],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-};
-
-// Apply CORS with options
-app.use(cors(corsOptions));
-
-// Handle preflight requests
-app.options('*', cors(corsOptions));
+app.use((req, res, next) => {
+  const allowedOrigins = [
+    'https://blogspace-two.vercel.app',
+    'https://blog-website-rouge-nine.vercel.app',
+    'http://localhost:5173'
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).json({});
+  }
+  
+  next();
+});
 
 // Body parser middleware
 app.use(express.json({ limit: '10mb' }));
