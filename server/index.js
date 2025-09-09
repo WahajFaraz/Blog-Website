@@ -1,13 +1,20 @@
 import 'dotenv/config';
+import 'express-async-errors';
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import helmet from 'helmet';
+import compression from 'compression';
+import morgan from 'morgan';
+import rateLimit from 'express-rate-limit';
 import userRoutes from './routes/user.js';
 import blogRoutes from './routes/blog.js';
 import mediaRoutes from './routes/media.js';
 
 const app = express();
+
+app.use(compression());
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
@@ -40,15 +47,20 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+const apiLimiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	max: 100, // Limit each IP to 100 requests per window
+	standardHeaders: true,
+	legacyHeaders: false,
+});
+app.use('/api/', apiLimiter);
+
 if (!process.env.MONGODB_URI) {
-  console.error('FATAL ERROR: MONGODB_URI is not defined');
-  process.exit(1);
+    console.error("FATAL ERROR: MONGODB_URI is not defined.");
+    process.exit(1);
 }
 
-mongoose.connect(process.env.MONGODB_URI, {
-  serverSelectionTimeoutMS: 5000,
-  socketTimeoutMS: 45000
-})
+mongoose.connect(process.env.MONGODB_URI)
 .then(() => console.log('MongoDB Connected'))
 .catch(err => {
   console.error('MongoDB Connection Error:', err);
