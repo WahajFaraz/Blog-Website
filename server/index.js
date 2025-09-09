@@ -23,6 +23,7 @@ app.use(helmet({
 
 const allowedOrigins = [
   'https://blogspace-two.vercel.app',
+  'https://blog-website-rouge-nine.vercel.app',
   'http://localhost:5173'];
 
 if (process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_URL) {
