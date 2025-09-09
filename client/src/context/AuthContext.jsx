@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await fetch('/api/users/profile', {
+      const response = await fetch('/api/v1/users/profile', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       
-      const response = await fetch('/api/users/login', {
+      const response = await fetch('/api/v1/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -99,7 +99,7 @@ export const AuthProvider = ({ children }) => {
 
       const isFormData = userData instanceof FormData;
       
-      const response = await fetch('/api/users/signup', {
+      const response = await fetch('/api/v1/users/signup', {
         method: 'POST',
         headers: isFormData ? {} : {
           'Content-Type': 'application/json'
@@ -152,7 +152,7 @@ export const AuthProvider = ({ children }) => {
 
       const isFormData = updates instanceof FormData;
       
-      const response = await fetch('/api/users/profile', {
+      const response = await fetch('/api/v1/users/profile', {
         method: 'PUT',
         headers: isFormData ? {
           'Authorization': `Bearer ${token}`
