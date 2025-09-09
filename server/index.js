@@ -74,6 +74,11 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/blogs', blogRoutes);
 app.use('/api/v1/media', mediaRoutes);
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.status(200).send("hello from wahaj's world");
+});
+
 // Health check endpoint
 app.get('/api/v1/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date() });
