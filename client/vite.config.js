@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     port: 5173,
     proxy: {
-      '/api': {
+      '/api/v1': {
         target: 'https://blog-website-rouge-nine.vercel.app',
         changeOrigin: true,
         secure: false,
