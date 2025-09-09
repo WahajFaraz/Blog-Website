@@ -1,7 +1,4 @@
-const path = require('path');
-const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env';
-require('dotenv').config({ path: path.resolve(__dirname, `./${envFile}`) });
-
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -14,94 +11,115 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false
 }));
 
-const whitelist = (process.env.CORS_ORIGIN || '').split(',');
-if (process.env.VERCEL_URL) {
-  whitelist.push(`https://${process.env.VERCEL_URL}`);
-}
-if (process.env.NODE_ENV !== 'production') {
-  whitelist.push('http://localhost:5173');
+const allowedOrigins = [
+  'https://blog-website-umber-sigma.vercel.app',
+  'http://localhost:5173',
+  'https://blogspace-two.vercel.app'
+];
+
+// Add Vercel preview URL if available
+if (process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_URL) {
+  allowedOrigins.push(`https://${process.env.VERCEL_URL}`);
 }
 
-const corsOptions = {
+app.use(cors({
   origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps or curl requests)
+    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
     }
-  }
-};
-app.use(cors(corsOptions));
+    // For debugging CORS issues
+    console.log('Blocked by CORS:', origin);
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true
+}));
 
+// Body parser middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// MongoDB connection
 if (!process.env.MONGODB_URI) {
-    console.error("FATAL ERROR: MONGODB_URI is not defined.");
-    process.exit(1);
+  console.error('FATAL ERROR: MONGODB_URI is not defined');
+  process.exit(1);
 }
 
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000
+})
 .then(() => console.log('MongoDB Connected'))
 .catch(err => {
   console.error('MongoDB Connection Error:', err);
   process.exit(1);
 });
 
+// API Routes
 app.use('/api/users', require('./routes/user'));
 app.use('/api/blogs', require('./routes/blog'));
 app.use('/api/media', require('./routes/media'));
 
-// Serve static assets in production
-// Vercel will handle this with rewrites
-// if (process.env.NODE_ENV === 'production') {
-//   // Set static folder
-//   app.use(express.static(path.join(__dirname, '../client/dist')));
-  
-//   app.get('*', (req, res) => {
-//     res.sendFile(path.resolve(__dirname, '..', 'client', 'dist', 'index.html'));
-//   });
-// }
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date() });
+});
 
 // API 404 handler
 app.use('/api/*', (req, res) => {
-  res.status(404).json({ error: 'API endpoint not found' });
+  res.status(404).json({ 
+    success: false,
+    error: 'API endpoint not found',
+    path: req.originalUrl
+  });
 });
 
+// Global error handler
 app.use((error, req, res, next) => {
   console.error('Global error handler:', error);
   
+  const response = {
+    success: false,
+    error: error.message || 'Internal Server Error',
+    stack: process.env.NODE_ENV === 'production' ? undefined : error.stack
+  };
+  
   if (error.name === 'ValidationError') {
-    return res.status(400).json({ 
-      error: 'Validation Error', 
-      details: Object.values(error.errors).map(err => err.message) 
-    });
+    response.error = 'Validation Error';
+    response.details = Object.values(error.errors).map(err => err.message);
+    return res.status(400).json(response);
   }
   
   if (error.name === 'CastError') {
-    return res.status(400).json({ error: 'Invalid ID format' });
+    response.error = 'Invalid ID format';
+    return res.status(400).json(response);
   }
   
   if (error.code === 11000) {
     const field = Object.keys(error.keyValue)[0];
-    return res.status(400).json({ error: `${field} already exists` });
+    response.error = `${field} already exists`;
+    return res.status(400).json(response);
   }
   
-  res.status(500).json({ error: 'Internal server error' });
+  res.status(500).json(response);
 });
 
-const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-});
+// Start server only when not in Vercel environment
+if (process.env.VERCEL !== '1') {
+  const PORT = process.env.PORT || 5000;
+  const server = app.listen(PORT, () => {
+    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  });
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  console.error(`Error: ${err.message}`);
-  // Close server & exit process
-  server.close(() => process.exit(1));
-});
+  // Handle unhandled promise rejections
+  process.on('unhandledRejection', (err) => {
+    console.error('Unhandled Rejection:', err);
+    server.close(() => process.exit(1));
+  });
+}
 
-module.exports = app;
+// Export the Express API for Vercel Serverless Functions
+export default app;
