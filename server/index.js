@@ -26,28 +26,51 @@ const allowedOrigins = [
   'https://blog-website-rouge-nine.vercel.app',
   'http://localhost:5173'];
 
-if (process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_URL) {
-  allowedOrigins.push(`https://${process.env.VERCEL_URL}`);
-}
-
-// CORS configuration
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    
+    const allowed = allowedOrigins.some(allowedOrigin => {
+      return origin === allowedOrigin || 
+             origin === `https://${allowedOrigin}` ||
+             origin === `http://${allowedOrigin}`;
+    });
+
+    if (allowed) {
       return callback(null, true);
     }
-    // For debugging CORS issues
+    
     console.log('Blocked by CORS:', origin);
-    return callback(new Error('Not allowed by CORS'));
+    return callback(new Error(`Not allowed by CORS. Origin: ${origin}`));
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept',
+    'Origin',
+    'Access-Control-Allow-Headers',
+    'Access-Control-Request-Method',
+    'Access-Control-Request-Headers'
+  ],
+  exposedHeaders: [
+    'Content-Length',
+    'Content-Type',
+    'Authorization',
+    'X-Total-Count',
+    'Link'
+  ],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 };
 
+// Apply CORS with options
 app.use(cors(corsOptions));
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
 
 // Body parser middleware
 app.use(express.json({ limit: '10mb' }));
@@ -122,19 +145,16 @@ app.use((error, req, res, next) => {
   res.status(500).json(response);
 });
 
-// Start server only when not in Vercel environment
 if (process.env.VERCEL !== '1') {
   const PORT = process.env.PORT || 5000;
   const server = app.listen(PORT, () => {
     console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
   });
 
-  // Handle unhandled promise rejections
   process.on('unhandledRejection', (err) => {
     console.error('Unhandled Rejection:', err);
     server.close(() => process.exit(1));
   });
 }
 
-// Export the Express API for Vercel Serverless Functions
 export default app;
