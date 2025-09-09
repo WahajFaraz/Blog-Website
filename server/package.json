@@ -3,6 +3,16 @@
   "version": "1.0.0",
   "description": "Blog application backend server",
   "main": "index.js",
+  "type": "module",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
+  },
+  "scripts": {
+    "start": "node --experimental-json-modules index.js",
+    "dev": "nodemon --experimental-json-modules index.js",
+    "vercel-build": "echo 'Skipping build - using serverless functions'"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.40.0",
@@ -18,15 +28,7 @@
     "mongoose": "^8.2.0",
     "morgan": "^1.10.0"
   },
-  "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "devDependencies": {
     "nodemon": "^3.1.0"
-  },
-  "engines": {
-    "node": ">=16.0.0"
   }
 }
