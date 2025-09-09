@@ -25,7 +25,11 @@ const BlogGrid = ({ blogs: initialBlogs, searchFilters = { query: '', category: 
       }
       
       const data = await response.json();
-      setBlogs(data.blogs || []);
+      if (data.success && data.data) {
+        setBlogs(data.data.blogs || []);
+      } else {
+        throw new Error(data.error || 'Failed to fetch blogs');
+      }
     } catch (error) {
       console.error('Error fetching blogs:', error);
     } finally {
