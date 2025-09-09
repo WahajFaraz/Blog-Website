@@ -17,7 +17,8 @@ const BlogGrid = ({ blogs: initialBlogs, searchFilters = { query: '', category: 
       if (searchFilters.category && searchFilters.category !== 'all') params.append('category', searchFilters.category);
       if (searchFilters.sort) params.append('sort', searchFilters.sort);
       
-      const url = `/api/v1/blogs${params.toString() ? '?' + params.toString() : ''}`;
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+      const url = `${baseUrl}/blogs${params.toString() ? '?' + params.toString() : ''}`;
       const response = await fetch(url);
       
       if (!response.ok) {
