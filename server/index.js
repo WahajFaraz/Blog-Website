@@ -79,27 +79,50 @@ app.get('/test', (req, res) => {
   res.status(200).json({ message: 'Test endpoint is working!' });
 });
 
-// Root endpoint - handle all methods
-app.all('/', (req, res) => {
-  const allowedOrigins = [
-    'https://blogspace-two.vercel.app',
-    'https://blog-website-tau-orpin.vercel.app/',
-    'http://localhost:5173'
-  ];
-  
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  }
-  
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-  
-  res.header('Content-Type', 'text/plain');
-  res.status(200).send("hello from wahaj's world");
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    status: 'success',
+    message: "Hello from Wahaj's Blog API",
+    endpoints: {
+      users: '/api/v1/users',
+      blogs: '/api/v1/blogs',
+      media: '/api/v1/media',
+      health: '/api/v1/health'
+    },
+    documentation: 'Please refer to the API documentation for available endpoints'
+  });
+});
+
+// Health check endpoint
+app.get('/api/v1/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
+// Handle 404 - Not Found
+app.use((req, res) => {
+  res.status(404).json({
+    status: 'error',
+    message: 'Not Found',
+    error: {
+      code: 'NOT_FOUND',
+      message: 'The requested resource was not found on this server.'
+    }
+  });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({
+    status: 'error',
+    message: 'Internal Server Error',
+    error: process.env.NODE_ENV === 'development' ? err.message : {}
+  });
 });
 
 // Health check endpoint
